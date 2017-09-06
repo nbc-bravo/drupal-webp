@@ -177,7 +177,7 @@ class ImageStyleDownloadController extends FileDownloadController {
   /**
    * Returns a WebP image as response.
    *
-   * @param $file
+   * @param string $file
    *   Path to image file.
    * @param array $headers
    *   Response headers.
