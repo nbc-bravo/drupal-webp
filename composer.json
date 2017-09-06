@@ -5,7 +5,6 @@
   "keywords": ["Drupal"],
   "license": "GPL-2.0+",
   "homepage": "https://www.drupal.org/project/webp",
-  "minimum-stability": "dev",
   "support": {
     "issues": "https://www.drupal.org/project/issues/webp",
     "source": "http://cgit.drupalcode.org/webp"
