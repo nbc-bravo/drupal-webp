@@ -177,6 +177,8 @@ class ImageStyleDownloadController extends FileDownloadController {
   /**
    * Returns a WebP image as response.
    *
+   * @param $file
+   *   Path to image file.
    * @param array $headers
    *   Response headers.
    * @param string $scheme
@@ -185,7 +187,7 @@ class ImageStyleDownloadController extends FileDownloadController {
    * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
    *   The transferred file as response.
    */
-  protected function webpResponse($file, $headers, $scheme) {
+  protected function webpResponse($file, array $headers, $scheme) {
     $headers += [
       'Content-Type' => 'image/webp',
       'Content-Length' => filesize($file),
@@ -210,7 +212,7 @@ class ImageStyleDownloadController extends FileDownloadController {
    * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
    *   The transferred file as response.
    */
-  protected function response(Image $image, $headers, $scheme) {
+  protected function response(Image $image, array $headers, $scheme) {
     $headers += [
       'Content-Type' => $image->getMimeType(),
       'Content-Length' => $image->getFileSize(),
