@@ -175,26 +175,40 @@ class ImageStyleDownloadController extends FileDownloadController {
   }
 
   /**
-   * @param $headers
-   * @param $scheme
+   * Returns a WebP image as response.
+   *
+   * @param array $headers
+   *   Response headers.
+   * @param string $scheme
+   *   The file scheme, defaults to 'private'.
    *
    * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+   *   The transferred file as response.
    */
   protected function webpResponse($file, $headers, $scheme) {
     $headers += [
       'Content-Type' => 'image/webp',
       'Content-Length' => filesize($file),
     ];
-
+    // \Drupal\Core\EventSubscriber\FinishResponseSubscriber::onRespond()
+    // sets response as not cacheable if the Cache-Control header is not
+    // already modified. We pass in FALSE for non-private schemes for the
+    // $public parameter to make sure we don't change the headers.
     return new BinaryFileResponse($file, 200, $headers, $scheme !== 'private');
   }
 
   /**
+   * Returns an image style derivative as response.
+   *
    * @param \Drupal\Core\Image\Image $image
-   * @param $headers
-   * @param $scheme
+   *   The image style derivation.
+   * @param array $headers
+   *   Response headers.
+   * @param string $scheme
+   *   The file scheme, defaults to 'private'.
    *
    * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+   *   The transferred file as response.
    */
   protected function response(Image $image, $headers, $scheme) {
     $headers += [
