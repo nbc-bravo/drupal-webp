@@ -161,7 +161,7 @@ class ImageStyleDownloadController extends FileDownloadController {
     if ($success) {
       $image = $this->imageFactory->get($derivative_uri);
 
-      if (($webp = \Drupal::service('webp.webp')->generateFromUri($image->getSource())) && in_array('image/webp', $request->getAcceptableContentTypes())) {
+      if (($webp = \Drupal::service('webp.webp')->createWebpCopy($image->getSource())) && in_array('image/webp', $request->getAcceptableContentTypes())) {
         return $this->webpResponse($webp, $headers, $scheme);
       }
       else {
