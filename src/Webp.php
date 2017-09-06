@@ -47,7 +47,7 @@ class Webp {
   }
 
   /**
-   * Creates a WebP copy of a JPEG/PNG image.
+   * Creates a WebP copy of a source image URI.
    *
    * @param $uri
    *   Image URI.
@@ -58,45 +58,39 @@ class Webp {
    *   The location of the WebP image if successful, FALSE if not successful.
    */
   public function createWebpCopy($uri, $quality = 100) {
-    if ($image = $this->createGdImageResourceFromUri($uri)) {
+    $webp = FALSE;
+
+    // Generate a GD resource from the source image. You can't pass GD resources
+    // created by the $imageFactory as a parameter to another function, so we
+    // have to do everything in one function.
+    $sourceImage = $this->imageFactory->get($uri, 'gd');
+    /** @var \Drupal\system\Plugin\ImageToolkit\GDToolkit $toolkit */
+    $toolkit = $sourceImage->getToolkit();
+    $sourceImage = $toolkit->getResource();
+
+    // If we can generate a GD resource from the source image, generate the URI
+    // of the WebP copy and try to create it.
+    if ($sourceImage !== NULL) {
       $pathInfo = pathinfo($uri);
       $destination = $pathInfo['dirname'] . '/' . $pathInfo['filename'] . '.webp';
-      if (imagewebp($image, $destination, $quality)) {
-        imagedestroy($image);
-        return $destination;
+      if (@imagewebp($sourceImage, $destination, $quality)) {
+        @imagedestroy($sourceImage);
+        $webp = $destination;
       }
       else {
         $error = $this->t('Could not generate WebP image.');
         $this->logger->error($error);
       }
     }
-
-    return FALSE;
-  }
-
-  /**
-   * Creates a GD image resource from a URI.
-   *
-   * @param $uri
-   *   Source image URI.
-   *
-   * @return null|resource
-   *   NULL or a GD image resource.
-   */
-  protected function createGdImageResourceFromUri($uri) {
-    $image = $this->imageFactory->get($uri, 'gd');
-    /** @var \Drupal\system\Plugin\ImageToolkit\GDToolkit $toolkit */
-    $toolkit = $image->getToolkit();
-    $resource = $toolkit->getResource();
-
-    if ($resource === NULL) {
+    // If we can't generate a GD resource from the source image, fail safely.
+    else {
       $error = $this->t('Could not generate image resource from URI @uri.', [
         '@uri' => $uri,
       ]);
       $this->logger->error($error);
     }
 
-    return $resource;
+    return $webp;
   }
 
   /**
