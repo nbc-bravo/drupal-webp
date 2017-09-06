@@ -1,6 +1,7 @@
 services:
   webp.route_subscriber:
     class: Drupal\webp\Routing\RouteSubscriber
+    arguments: ['@module_handler']
     tags:
       - { name: event_subscriber }
   webp.webp:

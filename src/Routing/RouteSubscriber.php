@@ -2,6 +2,7 @@
 
 namespace Drupal\webp\Routing;
 
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -13,12 +14,26 @@ use Symfony\Component\Routing\RouteCollection;
 class RouteSubscriber extends RouteSubscriberBase {
 
   /**
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * RouteSubscriber constructor.
+   *
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   Module handler.
+   */
+  public function __construct(ModuleHandlerInterface $moduleHandler) {
+    $this->moduleHandler = $moduleHandler;
+  }
+
+  /**
    * {@inheritdoc}
    */
   protected function alterRoutes(RouteCollection $collection) {
     /* @var \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler */
-    $moduleHandler = \Drupal::service('module_handler');
-    if ($moduleHandler->moduleExists('imageapi_optimize')) {
+    if ($this->moduleHandler->moduleExists('imageapi_optimize')) {
       return;
     }
 
