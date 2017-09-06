@@ -16,7 +16,7 @@ function webp_install() {
   // derivatives.
   if (!\Drupal::moduleHandler()->moduleExists('imageapi_optimize')) {
     /* @var \Drupal\webp\Webp $webp */
-    $webp = \Drupal::service('wepb.wepb');
+    $webp = \Drupal::service('webp.webp');
     $webp->deleteImageStyleDerivatives();
   }
 }
@@ -46,7 +46,7 @@ function webp_uninstall() {
   }
   else {
     /* @var \Drupal\webp\Webp $webp */
-    $webp = \Drupal::service('wepb.wepb');
+    $webp = \Drupal::service('webp.webp');
     $webp->deleteImageStyleDerivatives();
   }
 
