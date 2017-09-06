@@ -12,7 +12,8 @@ This module requires the the following PHP extension:
 
 ## Installation
  1. Install the module.
- 2. Copy the contents of the .htaccess file in the module root to your site-wide .htaccess.
+ 2. Copy the contents of the .htaccess file in the module root to your 
+ site-wide .htaccess.
 
 ## Maintainers
 * Bart Vanhoutte (Bart Vanhoutte) - https://www.drupal.org/user/1133754

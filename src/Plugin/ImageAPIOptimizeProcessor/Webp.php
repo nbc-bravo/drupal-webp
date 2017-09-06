@@ -38,7 +38,7 @@ class Webp extends ConfigurableImageAPIOptimizeProcessorBase {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form['quality'] = array(
+    $form['quality'] = [
       '#type' => 'number',
       '#title' => $this->t('Image quality'),
       '#description' => $this->t('Specify the image quality.'),
@@ -46,7 +46,7 @@ class Webp extends ConfigurableImageAPIOptimizeProcessorBase {
       '#required' => TRUE,
       '#min' => 1,
       '#max' => 100,
-    );
+    ];
     return $form;
   }
 

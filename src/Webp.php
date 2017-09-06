@@ -49,7 +49,7 @@ class Webp {
   /**
    * Creates a WebP copy of a source image URI.
    *
-   * @param $uri
+   * @param string $uri
    *   Image URI.
    * @param int $quality
    *   Image quality factor.

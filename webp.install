@@ -5,8 +5,6 @@
  * Contains install and update functions for WebP.
  */
 
-
-
 /**
  * Implements hook_install().
  */
@@ -25,7 +23,6 @@ function webp_install() {
  * Implements hook_uninstall().
  */
 function webp_uninstall() {
-
   if (\Drupal::moduleHandler()->moduleExists('imageapi_optimize')) {
     // imageapi_optimize: delete the WebP processor from all pipelines.
     $storage = \Drupal::entityTypeManager()->getStorage('imageapi_optimize_pipeline');
@@ -49,5 +46,4 @@ function webp_uninstall() {
     $webp = \Drupal::service('webp.webp');
     $webp->deleteImageStyleDerivatives();
   }
-
 }
