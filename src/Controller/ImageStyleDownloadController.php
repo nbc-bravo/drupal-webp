@@ -8,6 +8,7 @@ use Drupal\Core\Image\ImageFactory;
 use Drupal\Core\Lock\LockBackendInterface;
 use Drupal\image\ImageStyleInterface;
 use Drupal\system\FileDownloadController;
+use Drupal\webp\Webp;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -42,17 +43,27 @@ class ImageStyleDownloadController extends FileDownloadController {
   protected $logger;
 
   /**
+   * WebP driver.
+   *
+   * @var \Drupal\webp\Webp
+   */
+  protected $webp;
+
+  /**
    * Constructs a ImageStyleDownloadController object.
    *
    * @param \Drupal\Core\Lock\LockBackendInterface $lock
    *   The lock backend.
    * @param \Drupal\Core\Image\ImageFactory $image_factory
    *   The image factory.
+   * @param \Drupal\webp\Webp $webp
+   *   WebP driver.
    */
-  public function __construct(LockBackendInterface $lock, ImageFactory $image_factory) {
+  public function __construct(LockBackendInterface $lock, ImageFactory $image_factory, Webp $webp) {
     $this->lock = $lock;
     $this->imageFactory = $image_factory;
     $this->logger = $this->getLogger('image');
+    $this->webp = $webp;
   }
 
   /**
@@ -61,7 +72,8 @@ class ImageStyleDownloadController extends FileDownloadController {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('lock'),
-      $container->get('image.factory')
+      $container->get('image.factory'),
+      $container->get('webp.webp')
     );
   }
 
@@ -161,7 +173,7 @@ class ImageStyleDownloadController extends FileDownloadController {
     if ($success) {
       $image = $this->imageFactory->get($derivative_uri);
 
-      if (($webp = \Drupal::service('webp.webp')->createWebpCopy($image->getSource())) && in_array('image/webp', $request->getAcceptableContentTypes())) {
+      if (($webp = $this->webp->createWebpCopy($image->getSource())) && in_array('image/webp', $request->getAcceptableContentTypes())) {
         return $this->webpResponse($webp, $headers, $scheme);
       }
       else {
