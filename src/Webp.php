@@ -77,19 +77,32 @@ class Webp {
     $sourceImage = $this->imageFactory->get($uri, 'gd');
     /** @var \Drupal\system\Plugin\ImageToolkit\GDToolkit $toolkit */
     $toolkit = $sourceImage->getToolkit();
+    $mimeType = $sourceImage->getMimeType();
     $sourceImage = $toolkit->getResource();
 
     // If we can generate a GD resource from the source image, generate the URI
     // of the WebP copy and try to create it.
-    if ($sourceImage !== NULL) {
+    if ($sourceImage !== NULL && $mimeType !== 'image/png') {
+
       $pathInfo = pathinfo($uri);
-      $destination = $pathInfo['dirname'] . '/' . $pathInfo['filename'] . '.webp';
+      $destination = strtr('@directory/@filename.@extension.webp', [
+        '@directory' => $pathInfo['dirname'],
+        '@filename' => $pathInfo['filename'],
+        '@extension' => $pathInfo['extension'],
+      ]);
 
       if (is_null($quality)) {
         $quality = $this->defaultQuality;
       }
 
       if (@imagewebp($sourceImage, $destination, $quality)) {
+        // In some cases, libgd generates broken images. See
+        // https://stackoverflow.com/questions/30078090/imagewebp-php-creates-corrupted-webp-files
+        // for more information.
+        if (filesize($destination) % 2 == 1) {
+          file_put_contents($destination, "\0", FILE_APPEND);
+        }
+
         @imagedestroy($sourceImage);
         $webp = $destination;
       }
