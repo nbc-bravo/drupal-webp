@@ -2,6 +2,7 @@
 
 namespace Drupal\webp;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Image\ImageFactory;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -31,6 +32,13 @@ class Webp {
   protected $logger;
 
   /**
+   * Default image processing quality.
+   *
+   * @var int
+   */
+  protected $defaultQuality;
+
+  /**
    * Webp constructor.
    *
    * @param \Drupal\Core\Image\ImageFactory $imageFactory
@@ -39,11 +47,14 @@ class Webp {
    *   Logger channel factory.
    * @param \Drupal\Core\StringTranslation\TranslationInterface $stringTranslation
    *   String translation interface.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   Configuration factory.
    */
-  public function __construct(ImageFactory $imageFactory, LoggerChannelFactoryInterface $loggerFactory, TranslationInterface $stringTranslation) {
+  public function __construct(ImageFactory $imageFactory, LoggerChannelFactoryInterface $loggerFactory, TranslationInterface $stringTranslation, ConfigFactoryInterface $configFactory) {
     $this->imageFactory = $imageFactory;
     $this->logger = $loggerFactory->get('webp');
     $this->setStringTranslation($stringTranslation);
+    $this->defaultQuality = $configFactory->get('webp.settings')->get('quality');
   }
 
   /**
@@ -52,12 +63,12 @@ class Webp {
    * @param string $uri
    *   Image URI.
    * @param int $quality
-   *   Image quality factor.
+   *   Image quality factor (optional).
    *
    * @return bool|string
    *   The location of the WebP image if successful, FALSE if not successful.
    */
-  public function createWebpCopy($uri, $quality = 100) {
+  public function createWebpCopy($uri, $quality = NULL) {
     $webp = FALSE;
 
     // Generate a GD resource from the source image. You can't pass GD resources
@@ -73,6 +84,11 @@ class Webp {
     if ($sourceImage !== NULL) {
       $pathInfo = pathinfo($uri);
       $destination = $pathInfo['dirname'] . '/' . $pathInfo['filename'] . '.webp';
+
+      if (is_null($quality)) {
+        $quality = $this->defaultQuality;
+      }
+
       if (@imagewebp($sourceImage, $destination, $quality)) {
         @imagedestroy($sourceImage);
         $webp = $destination;
