@@ -101,6 +101,39 @@ class ImageStyleDownloadController extends FileDownloadController {
     $target = $request->query->get('file');
     $image_uri = $scheme . '://' . $target;
 
+    // Don't try to generate file if source is missing.
+    if (!file_exists($image_uri)) {
+
+      $path_info = pathinfo($image_uri);
+
+      $possible_image_uris = [
+        // If the image style converted the extension, it has been added to the
+        // original file, resulting in filenames like image.png.jpeg. So to find
+        // the actual source image, we remove the extension and check if that
+        // image exists.
+        $path_info['dirname'] . DIRECTORY_SEPARATOR . $path_info['filename'],
+
+        // Try out the different possible sources for a webp image.
+        str_replace('.webp', '.jpg', $image_uri),
+        str_replace('.webp', '.jpeg', $image_uri),
+        str_replace('.webp', '.png', $image_uri),
+      ];
+
+      $source_image_found = FALSE;
+      foreach ($possible_image_uris as $possible_image_uri) {
+        if (file_exists($possible_image_uri)) {
+          $image_uri = $possible_image_uri;
+          $source_image_found = TRUE;
+          break;
+        }
+      }
+
+      if (!$source_image_found) {
+        $this->logger->notice('Source image at %source_image_path not found while trying to generate derivative image.', ['%source_image_path' => $image_uri]);
+        return new Response($this->t('Error generating image, missing source file.'), 404);
+      }
+    }
+
     // Check that the style is defined, the scheme is valid, and the image
     // derivative token is valid. Sites which require image derivatives to be
     // generated without a token can set the
@@ -129,24 +162,6 @@ class ImageStyleDownloadController extends FileDownloadController {
       $headers = $this->moduleHandler()->invokeAll('file_download', [$image_uri]);
       if (in_array(-1, $headers) || empty($headers)) {
         throw new AccessDeniedHttpException();
-      }
-    }
-
-    // Don't try to generate file if source is missing.
-    if (!file_exists($image_uri)) {
-      // If the image style converted the extension, it has been added to the
-      // original file, resulting in filenames like image.png.jpeg. So to find
-      // the actual source image, we remove the extension and check if that
-      // image exists.
-      $path_info = pathinfo($image_uri);
-      $converted_image_uri = $path_info['dirname'] . DIRECTORY_SEPARATOR . $path_info['filename'];
-      if (!file_exists($converted_image_uri)) {
-        $this->logger->notice('Source image at %source_image_path not found while trying to generate derivative image at %derivative_path.', ['%source_image_path' => $image_uri, '%derivative_path' => $derivative_uri]);
-        return new Response($this->t('Error generating image, missing source file.'), 404);
-      }
-      else {
-        // The converted file does exist, use it as the source.
-        $image_uri = $converted_image_uri;
       }
     }
 

@@ -85,7 +85,7 @@ class Webp {
     if ($sourceImage !== NULL && $mimeType !== 'image/png') {
 
       $pathInfo = pathinfo($uri);
-      $destination = strtr('@directory/@filename.@extension.webp', [
+      $destination = strtr('@directory/@filename.webp', [
         '@directory' => $pathInfo['dirname'],
         '@filename' => $pathInfo['filename'],
         '@extension' => $pathInfo['extension'],
