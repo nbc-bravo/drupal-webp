@@ -43,7 +43,10 @@ function webp_preprocess_responsive_image(&$variables) {
 
       if ($srcset_attribute_key !== FALSE) {
         $original_url = $source->offsetGet($srcset_attribute_key)->value();
-        $webp_url = preg_replace('/\.(png|jpg|jpeg)(\\?.*)?$/', '.webp\\2', $original_url);
+
+        /* @var \Drupal\webp\Webp $webp */
+        $webp = \Drupal::service('webp.webp');
+        $webp_url = $webp->getWebpFilename($original_url);
 
         // Create a new source pointing to the webp URL.
         $webp_source = clone $source;
