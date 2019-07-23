@@ -82,7 +82,7 @@ class Webp {
 
     // If we can generate a GD resource from the source image, generate the URI
     // of the WebP copy and try to create it.
-    if ($sourceImage !== NULL && $mimeType !== 'image/png') {
+    if ($sourceImage !== NULL) {
 
       $pathInfo = pathinfo($uri);
       $destination = strtr('@directory/@filename.webp', [
@@ -95,7 +95,25 @@ class Webp {
         $quality = $this->defaultQuality;
       }
 
-      if (@imagewebp($sourceImage, $destination, $quality)) {
+      $file_system = \Drupal::service('file_system');
+      $command = strtr('cwebp -q @quality "@source" -o "@destination"', [
+        '@quality' => $quality,
+        '@source' => $file_system->realpath($uri),
+        '@destination' => $file_system->realpath($destination),
+      ]);
+      @exec($command, $output, $return_var);
+
+      if ($return_var === 0) {
+        // In some cases, libgd generates broken images. See
+        // https://stackoverflow.com/questions/30078090/imagewebp-php-creates-corrupted-webp-files
+        // for more information.
+        if (filesize($destination) % 2 == 1) {
+          file_put_contents($destination, "\0", FILE_APPEND);
+        }
+
+      @imagedestroy($sourceImage);
+      $webp = $destination;
+    } elseif (@imagewebp($sourceImage, $destination, $quality)) {
         // In some cases, libgd generates broken images. See
         // https://stackoverflow.com/questions/30078090/imagewebp-php-creates-corrupted-webp-files
         // for more information.
