@@ -152,27 +152,16 @@ class Webp {
   }
 
   /**
-   * Receives the path of an image and returns the webp equivalent.
+   * Receives the srcset string of an image and returns the webp equivalent.
    *
-   * @param $filepath
-   *   Filepath to convert into .webp extension
+   * @param $srcset
+   *   Srcset to convert to .webp version
    *
    * @return string
-   *  file string with .webp extension
+   *   Webp version of srcset
    */
-  public function getWebpFilename($filepath) {
-    $parts = parse_url($filepath);
-    // We will deconstruct the path and add the arguments later.
-    $path = $parts['path'];
-
-    $webp_url = preg_replace('/\.(png|jpg|jpeg|PNG|JPG|JPEG)(\\?.*)?$/', '.webp\\2', $path);
-
-    // If any arguments were in the filepath, add them now.
-    if (isset($parts['query'])) {
-      $webp_url = $webp_url . '?' . $parts['query'];
-    }
-
-    return $webp_url;
+  public function getWebpSrcset($srcset) {
+    return preg_replace('/\.(png|jpg|jpeg)(\\?.*?)?(,| |$)/i', '.webp\\2\\3', $srcset);
   }
 
 }
